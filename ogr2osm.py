@@ -347,6 +347,7 @@ def output():
 			if not isinstance(way.geometry, geom.Way): continue
 			assert way.geometry.id != 0
 			for node in way.geometry.points:
+				if node.id in writtenNodes: continue #Remove duplicates
 				writtenNodes.add(node.id)
 				xmlattrs = {'visible':'true','id':str(node.id), 'lat':str(node.y*10**-options.significantDigits), 'lon':str(node.x*10**-options.significantDigits)}
 				xmlattrs.update(attributes)
@@ -365,9 +366,12 @@ def output():
 			
 			xmlobject = etree.Element('way', xmlattrs)
 			
+			prevNode = None
 			for node in way.geometry.points:
+				if prevNode is not None and node.id == prevNode.id: continue #Remove duplicates
 				nd = etree.Element('nd',{'ref':str(node.id)})
 				xmlobject.append(nd)
+				prevNove = node
 
 			for (key, value) in way.tags.items():
 				tag = etree.Element('tag', {'k':key, 'v':value})
